@@ -1,10 +1,10 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { InstrumentType, NoteData } from './types';
-import { INITIAL_BPM, INSTRUMENT_LABELS, NOTE_DURATIONS } from './constants';
+import { INITIAL_BPM, INSTRUMENT_LABELS, NOTE_DURATIONS, SOLFEGE_MAP } from './constants';
 import { audioService } from './services/audioService';
 import { analyzeSheetMusic, fileToGenerativePart } from './services/geminiService';
 import { PianoRoll } from './components/PianoRoll';
-import {  Play, Square, Music, Upload, Loader2, Wand2, Volume2, Clock, Activity } from 'lucide-react';
+import {  Play, Square, Music, Upload, Loader2, Wand2, Volume2, Clock, Activity, AlertCircle } from 'lucide-react';
 
 const App: React.FC = () => {
   const [bpm, setBpm] = useState(INITIAL_BPM);
@@ -19,6 +19,15 @@ const App: React.FC = () => {
   const [playingNoteIndex, setPlayingNoteIndex] = useState<number | null>(null);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Helper to get Solfege name (e.g. C4 -> DO 4)
+  const getNoteLabel = (pitch: string) => {
+    if (pitch === 'R') return 'ES (Sessiz)';
+    const key = pitch.replace(/[0-9]/g, '');
+    const octave = pitch.replace(/[^0-9]/g, '');
+    const solfege = SOLFEGE_MAP[key] || key;
+    return `${solfege} ${octave} (${pitch})`;
+  };
 
   // Playback tracking effect
   useEffect(() => {
@@ -279,8 +288,8 @@ const App: React.FC = () => {
                 {playingNoteIndex !== null && notes[playingNoteIndex] ? (
                   <>
                      <div className="text-right">
-                       <div className="text-4xl font-mono font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">
-                         {notes[playingNoteIndex].pitch}
+                       <div className="text-3xl sm:text-4xl font-mono font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">
+                         {getNoteLabel(notes[playingNoteIndex].pitch)}
                        </div>
                      </div>
                      <Activity className="w-8 h-8 text-slate-700 animate-pulse" />
@@ -298,7 +307,7 @@ const App: React.FC = () => {
                  Nota Düzenleyicisi
                </h2>
                <div className="text-sm text-slate-400 mt-1">
-                  {notes.length} nota tespit edildi. Bir süre seçin ve değiştirmek için notaya tıklayın.
+                  AI bazen hata yapabilir. Listeden notaları kontrol edip düzeltebilirsiniz.
                </div>
             </div>
 
@@ -342,14 +351,19 @@ const App: React.FC = () => {
           {/* Detailed Note List Editor (Collapsible or Scrollable) */}
           {notes.length > 0 && (
             <div className="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
-              <div className="overflow-x-auto">
+               <div className="bg-slate-950/50 p-2 flex items-center gap-2 text-yellow-500 text-xs border-b border-slate-800">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>İpucu: Eğer notalar yanlış görünüyorsa, "Nota (Pitch)" kutusuna tıklayıp düzeltebilirsiniz (Örn: G4 yerine A4 yazın).</span>
+               </div>
+              <div className="overflow-x-auto max-h-96">
                 <table className="w-full text-left text-sm text-slate-400">
-                  <thead className="bg-slate-950 text-slate-200 uppercase font-medium">
+                  <thead className="bg-slate-950 text-slate-200 uppercase font-medium sticky top-0 z-10">
                     <tr>
-                      <th className="px-6 py-3">#</th>
-                      <th className="px-6 py-3">Nota (Pitch)</th>
-                      <th className="px-6 py-3">Süre (Duration)</th>
-                      <th className="px-6 py-3">Dinle</th>
+                      <th className="px-6 py-3 bg-slate-950">#</th>
+                      <th className="px-6 py-3 bg-slate-950">Nota (Pitch)</th>
+                      <th className="px-6 py-3 bg-slate-950">Türkçe Karşılık</th>
+                      <th className="px-6 py-3 bg-slate-950">Süre (Duration)</th>
+                      <th className="px-6 py-3 bg-slate-950">Dinle</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800">
@@ -361,8 +375,11 @@ const App: React.FC = () => {
                             type="text" 
                             value={note.pitch}
                             onChange={(e) => handleNoteChange(note.id, 'pitch', e.target.value.toUpperCase())}
-                            className="bg-transparent border border-slate-700 rounded px-2 py-1 text-white w-20 focus:border-indigo-500 outline-none"
+                            className="bg-transparent border border-slate-700 rounded px-2 py-1 text-white w-24 focus:border-indigo-500 outline-none uppercase"
                           />
+                        </td>
+                        <td className="px-6 py-3 font-mono text-indigo-300">
+                          {getNoteLabel(note.pitch)}
                         </td>
                         <td className="px-6 py-3">
                            <select

@@ -21,18 +21,28 @@ export const fileToGenerativePart = async (file: File): Promise<string> => {
 export const analyzeSheetMusic = async (base64Image: string, mimeType: string): Promise<NoteData[]> => {
   try {
     const prompt = `
-      Analyze this image of sheet music. 
-      Identify the sequence of notes.
-      Assume a standard treble clef if not specified.
-      If there are chords, pick the top note (melody).
-      Return a JSON array of notes.
+      Act as an expert music theorist and optical music recognition engine.
+      Analyze this image of sheet music carefully.
+      
+      Steps:
+      1. Identify the Clef (assume Treble Clef / Sol Anahtarı if not obvious).
+      2. Read the notes from left to right.
+      3. Pay extreme attention to the vertical position of the note head on the staff lines and spaces to determine the correct Pitch.
+      4. Identify the duration of each note based on the note head (filled/hollow) and stems/flags.
+      
+      If there are chords (multiple notes stacked), ONLY pick the top note (the melody).
+      
+      Return a strict JSON array of notes.
       
       For each note, provide:
-      - "pitch": The scientific pitch notation (e.g., "C4", "D#5", "A3"). Use "R" for rests.
+      - "pitch": The scientific pitch notation (e.g., "C4", "D5", "F#4", "B3"). Use "R" for rests.
       - "duration": The rhythmic value relative to a quarter note. 
          (Quarter note = 1.0, Half note = 2.0, Whole note = 4.0, Eighth note = 0.5, Sixteenth = 0.25).
       
-      Be strictly precise with the JSON format.
+      Examples:
+      - A note on the bottom line of Treble clef is E4.
+      - A note in the bottom space of Treble clef is F4.
+      - A note on the second line of Treble clef is G4 (Sol).
     `;
 
     const response = await ai.models.generateContent({

@@ -17,3 +17,19 @@ export const NOTE_DURATIONS = [
 ];
 
 export const INITIAL_BPM = 120;
+
+export const SOLFEGE_MAP: Record<string, string> = {
+  'C': 'DO',
+  'C#': 'DO#',
+  'D': 'RE',
+  'D#': 'RE#',
+  'E': 'Mİ',
+  'F': 'FA',
+  'F#': 'FA#',
+  'G': 'SOL',
+  'G#': 'SOL#',
+  'A': 'LA',
+  'A#': 'LA#',
+  'B': 'Sİ',
+  'R': 'ES'
+};

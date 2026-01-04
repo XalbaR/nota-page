@@ -1,0 +1,5 @@
+{
+  "name": "NotaOku: AI Müzik Çalar",
+  "description": "Yapay zeka destekli nota okuma ve çalma uygulaması. Notaların fotoğrafını yükleyin, Gemini notaları analiz etsin ve istediğiniz enstrümanla çalsın.",
+  "requestFramePermissions": []
+}
